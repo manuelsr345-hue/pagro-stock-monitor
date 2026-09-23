@@ -1,0 +1,44 @@
+name: PAGRO Stock Monitor
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/5 * * * *"
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Playwright
+        run: |
+          pip install playwright
+          playwright install --with-deps chromium
+
+      - name: Run PAGRO monitor
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python monitor.py
+
+      - name: Save state
+        run: |
+          git config user.name "PAGRO Monitor"
+          git config user.email "pagro-monitor@users.noreply.github.com"
+
+          git add stock_state.json debug.json || true
+
+          git diff --cached --quiet || git commit -m "Update monitor state"
+          git push
