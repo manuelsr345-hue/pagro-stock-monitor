@@ -1,28 +1,33 @@
 import urllib.request
 
-URLS = [
-    "https://www.pagro.at/store-api/product",
-    "https://www.pagro.at/api/product",
-    "https://www.pagro.at/api/search",
-]
+PAGRO_URL = "https://www.pagro.at/pokemon-30-jahre-sammelkartenspiel-top-trainer-box-196214144842.html"
 
-for url in URLS:
-    print()
-    print("Teste:", url)
+JINA_URL = "https://r.jina.ai/" + PAGRO_URL
 
-    try:
-        request = urllib.request.Request(
-            url,
-            headers={
-                "User-Agent": "Mozilla/5.0",
-                "Accept": "application/json"
-            }
+print("Teste Jina Reader...")
+print("URL:", JINA_URL)
+
+request = urllib.request.Request(
+    JINA_URL,
+    headers={
+        "User-Agent": "Mozilla/5.0"
+    }
+)
+
+try:
+    with urllib.request.urlopen(request, timeout=60) as response:
+
+        status = response.status
+        content = response.read().decode(
+            "utf-8",
+            errors="ignore"
         )
 
-        with urllib.request.urlopen(request, timeout=20) as response:
-            print("HTTP:", response.status)
-            print("Content-Type:", response.headers.get("Content-Type"))
-            print("Antwort:", response.read(500).decode("utf-8", errors="ignore"))
+        print("HTTP Status:", status)
+        print("Antwort-Länge:", len(content))
+        print()
+        print("ERSTE 3000 ZEICHEN:")
+        print(content[:3000])
 
-    except Exception as e:
-        print("Fehler:", e)
+except Exception as e:
+    print("FEHLER:", e)
